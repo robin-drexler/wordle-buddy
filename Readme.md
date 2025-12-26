@@ -22,7 +22,7 @@ The word to start the wordle with.
 Otherwise starts with `stare`.
 
 ```
-START_WORD=house npm run play
+START_WORD=house npx wordle-buddy
 ```
 
 ### `DAYS`
