@@ -67,25 +67,63 @@ async function runTries(page, suggestion = "", bannedWords = [], counter = 0) {
   const { absent, correct, present } = await getPositions(page);
   suggestion = suggestion || suggestWord(absent, correct, present, bannedWords);
 
+  console.log(
+    `\n🎯 Attempt ${counter + 1}/6: Trying "${suggestion.toUpperCase()}"`
+  );
+
   await enterWord(page, suggestion);
   const worked = await wordWorked(page);
 
   if (!worked) {
+    console.log(`   ❌ "${suggestion.toUpperCase()}" is not a valid word`);
     await eraseCurrentWord(page);
-
     bannedWords.push(suggestion);
   } else {
     counter++;
+    const result = await getLastRowResult(page, counter);
+    console.log(`   ${result}`);
   }
+
   const hasWon = await checkHasWon(page);
-  console.log({ hasWon });
+
+  if (hasWon) {
+    console.log(
+      `\n🎉 Solved in ${counter} ${counter === 1 ? "try" : "tries"}!`
+    );
+    return;
+  }
 
   // todo check if there's no more row to try instead of counting
-  if (counter >= 6 || hasWon) {
+  if (counter >= 6) {
+    console.log(`\n😔 Failed to solve the puzzle`);
     return;
   }
 
   return runTries(page, "", bannedWords, counter);
+}
+
+/**
+ * Get a visual representation of the last guess result
+ * @param {import('playwright-core').Page} page
+ * @param {number} rowNumber
+ */
+async function getLastRowResult(page, rowNumber) {
+  const allRows = await page.locator('[class*="Row-module"]').elementHandles();
+  const row = allRows[rowNumber - 1];
+  const tiles = await row.$$('[class*="Tile-module"]');
+
+  let result = "";
+  for (const tile of tiles) {
+    const state = await tile.getAttribute("data-state");
+    if (state === "correct") {
+      result += "🟩";
+    } else if (state === "present") {
+      result += "🟨";
+    } else {
+      result += "⬛";
+    }
+  }
+  return result;
 }
 
 /**
@@ -171,6 +209,16 @@ export async function solveWordle() {
   await page.goto("https://www.nytimes.com/games/wordle/index.html");
   await afterLoad();
 
+  console.log("🔤 Wordle Buddy starting...");
+  if (process.env.DAYS) {
+    const days = parseInt(process.env.DAYS, 10);
+    console.log(
+      `📅 Playing Wordle from ${
+        days > 0 ? days + " days in the future" : Math.abs(days) + " days ago"
+      }`
+    );
+  }
+
   // Click the "Play" or "Continue" button on the welcome screen
   // Using data-testid for more reliable selection
   const playOrContinueButton = page.locator(
@@ -185,12 +233,15 @@ export async function solveWordle() {
   }
 
   // todo plan for the game not being won
-  await runTries(page, process.env.START_WORD?.toLocaleLowerCase() || "stare");
+  const startWord = process.env.START_WORD?.toLocaleLowerCase() || "stare";
+  console.log(`\n🚀 Starting word: "${startWord.toUpperCase()}"`);
+  await runTries(page, startWord);
 
   if (process.env.COPY_STATS) {
     // Close the stats modal that appears after winning
     await page.locator('button[aria-label="Close"]').click();
     await page.locator('button:has-text("Share")').click({ timeout: 10000 });
+    console.log("\n📋 Stats copied to clipboard!");
   }
 
   if (process.env.RECORD_VIDEO) {
