@@ -11,26 +11,24 @@ async function wait(seconds) {
  * @param {import('playwright-core').Page} page
  */
 async function getPositions(page) {
-  let forbidden = await page
-    .locator("#keyboard [data-state='absent']")
+  const forbidden = await page
+    .locator('[data-state="absent"]')
     .elementHandles();
 
   const absent = await Promise.all(
-    forbidden.map((elementHandle) => elementHandle.getAttribute("data-key"))
+    forbidden.map((el) => el.getAttribute("data-key"))
   );
 
-  const allRows = await page.locator("#board .row").elementHandles();
+  const allRows = await page.locator('[class*="Row-module"]').elementHandles();
 
   const correct = new Map();
   const present = new Map();
 
-  const rows = [];
-
   for (const row of allRows) {
-    const tiles = await row.$$(".tile");
+    const tiles = await row.$$('[class*="Tile-module"]');
 
     for (const [tileIndex, tile] of tiles.entries()) {
-      const letter = await (await tile.innerText()).toLowerCase();
+      const letter = (await tile.textContent()).toLowerCase();
       const state = await tile.getAttribute("data-state");
 
       if (state === "empty") {
@@ -44,7 +42,7 @@ async function getPositions(page) {
       }
       if (
         state === "present" ||
-        // this happens when the same latter is already correct somewhere else
+        // this happens when the same letter is already correct somewhere else
         // if we don't add it here, it would retry the same word over and over
         (state === "absent" && !absent.includes(letter))
       ) {
@@ -117,7 +115,7 @@ async function eraseCurrentWord(page) {
  * @param {import('playwright-core').Page} page
  */
 async function wordWorked(page) {
-  const tiles = await page.locator("#board .tile").elementHandles();
+  const tiles = await page.locator('[class*="Tile-module"]').elementHandles();
 
   for (const tile of tiles) {
     const state = await tile.getAttribute("data-state");
@@ -130,14 +128,13 @@ async function wordWorked(page) {
 }
 
 async function checkHasWon(page) {
-  const allRows = await page.locator("#board .row").elementHandles();
+  const allRows = await page.locator('[class*="Row-module"]').elementHandles();
 
   for (const row of allRows) {
     let allCorrect = true;
-    const tiles = await row.$$(".tile");
+    const tiles = await row.$$('[class*="Tile-module"]');
 
     for (const tile of tiles) {
-      const letter = await (await tile.innerText()).toLowerCase();
       const state = await tile.getAttribute("data-state");
 
       if (state !== "correct") {
@@ -146,7 +143,7 @@ async function checkHasWon(page) {
       }
     }
 
-    if (allCorrect) {
+    if (allCorrect && tiles.length === 5) {
       return true;
     }
   }
@@ -171,15 +168,29 @@ export async function solveWordle() {
 
   const afterLoad = await addFakeTimers(page, time);
 
-  await page.goto("https://www.powerlanguage.co.uk/wordle/");
+  await page.goto("https://www.nytimes.com/games/wordle/index.html");
   await afterLoad();
-  await page.locator(".close-icon").click();
+
+  // Click the "Play" or "Continue" button on the welcome screen
+  // Using data-testid for more reliable selection
+  const playOrContinueButton = page.locator(
+    '[data-testid="Play"], [data-testid="Continue"]'
+  );
+  await playOrContinueButton.click();
+
+  // Wait for the "How to Play" modal and close it (only appears for first-time users)
+  const closeButton = page.locator('dialog button[aria-label="Close"]');
+  if (await closeButton.isVisible({ timeout: 2000 }).catch(() => false)) {
+    await closeButton.click();
+  }
 
   // todo plan for the game not being won
   await runTries(page, process.env.START_WORD?.toLocaleLowerCase() || "stare");
 
   if (process.env.COPY_STATS) {
-    await page.locator("#share-button").click({ timeout: 10000 });
+    // Close the stats modal that appears after winning
+    await page.locator('button[aria-label="Close"]').click();
+    await page.locator('button:has-text("Share")').click({ timeout: 10000 });
   }
 
   if (process.env.RECORD_VIDEO) {

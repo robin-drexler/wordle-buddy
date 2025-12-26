@@ -23,15 +23,19 @@ export async function addFakeTimers(page, time) {
 
   await page.addInitScript((time) => {
     // @ts-ignore
-    window.__clock = sinon.useFakeTimers(time);
+    // Only fake Date, not timers - this prevents issues with NYT's analytics
+    window.__clock = sinon.useFakeTimers({
+      now: time,
+      toFake: ["Date"],
+    });
   }, time);
 
   return async function afterLoad() {
     await page.evaluate(() => {
       // @ts-ignore
-      window.__clock.tick(1000);
-      // @ts-ignore
-      window.__clock.restore();
+      if (window.__clock) {
+        window.__clock.restore();
+      }
     });
   };
 }
