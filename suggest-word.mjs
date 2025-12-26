@@ -52,6 +52,14 @@ export function suggestWord(absent, correct, present, bannedWords) {
     return true;
   });
 
+  // prefer words with more unique letters to gain more information
+  suggestions.sort((a, b) => {
+    const aUniqueLetters = new Set(a).size;
+    const bUniqueLetters = new Set(b).size;
+
+    return bUniqueLetters - aUniqueLetters;
+  });
+
   return suggestions[0];
 }
 
