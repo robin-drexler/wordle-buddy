@@ -1,6 +1,6 @@
 {
   "name": "wordle-buddy",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Bot that solves wordle puzzles",
   "main": "index.mjs",
   "bin": "bin.mjs",
