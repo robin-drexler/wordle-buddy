@@ -1,6 +1,11 @@
 import express from "express";
+import words from "../words.json" with { type: "json" };
 
 const app = express();
+
+app.get("/api/words", (req, res) => {
+  res.json(words);
+});
 
 app.get("/api/:date", async (req, res) => {
   const { date } = req.params;
