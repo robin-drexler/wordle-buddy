@@ -3,6 +3,7 @@
   "version": "0.0.5",
   "description": "Bot that solves wordle puzzles",
   "main": "index.mjs",
+  "type": "module",
   "bin": "./src/playwright/bin.mjs",
   "scripts": {
     "playwright:play": "./src/playwright/bin.mjs",
@@ -12,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.13.3",
     "find-up": "^6.2.0",
     "playwright": "^1.17.2",
     "sinon": "^12.0.1"
