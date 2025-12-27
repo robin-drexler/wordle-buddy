@@ -1,7 +1,13 @@
 import express from "express";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import words from "../words.json" with { type: "json" };
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
+
+// Serve static files from the dist folder
+app.use(express.static(join(__dirname, "dist")));
 
 app.get("/api/words", (req, res) => {
   res.json(words);
@@ -29,8 +35,9 @@ app.get("/api/:date", async (req, res) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.send("hello world");
+// Serve the SPA for all other routes
+app.get("*", (req, res) => {
+  res.sendFile(join(process.cwd(), "src", "web", "dist", "index.html"));
 });
 
 export default app;

@@ -3,3 +3,4 @@ videos
 *.mp4
 .vercel
 .env*.local
+**/dist/

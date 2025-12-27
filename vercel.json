@@ -1,16 +1,4 @@
 {
-  "version": 2,
-  "bunVersion": "1.x",
-  "builds": [
-    {
-      "src": "src/web/server.mjs",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "src/web/server.mjs"
-    }
-  ]
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "rewrites": [{ "source": "/(.*)", "destination": "/src/web/server.mjs" }]
 }
