@@ -3,10 +3,10 @@
   "version": "0.0.5",
   "description": "Bot that solves wordle puzzles",
   "main": "index.mjs",
-  "bin": "bin.mjs",
+  "bin": "./src/playwright/bin.mjs",
   "scripts": {
-    "play": "./bin.mjs",
-    "record": "RECORD_VIDEO=1 ./bin.mjs"
+    "playwright:play": "./src/playwright/bin.mjs",
+    "playwright:record": "RECORD_VIDEO=1 ./src/playwright/bin.mjs"
   },
   "keywords": [],
   "author": "",
