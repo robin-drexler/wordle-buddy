@@ -1,6 +1,6 @@
 import { chromium } from "playwright";
 import { addFakeTimers } from "./add-fake-timers.mjs";
-import { suggestWord } from "./suggest-word.mjs";
+import { suggestWord } from "../suggest-word.mjs";
 
 async function wait(seconds) {
   return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
