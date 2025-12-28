@@ -1,16 +1,5 @@
-import words from "./words.json" with { type: "json" };
+import words from "../../../words.json";
 
-/**
- * @typedef {Map<string,number[]>} LetterPositions
- */
-
-/**
- *
- * @param {string[]} absent
- * @param {LetterPositions} correct
- * @param {LetterPositions} present
- * @param {string[]} bannedWords
- */
 export function suggestWord(absent, correct, present, bannedWords) {
   const wordLength = 5;
 
@@ -48,7 +37,6 @@ export function suggestWord(absent, correct, present, bannedWords) {
     return true;
   });
 
-  // prefer words with more unique letters to gain more information
   suggestions.sort((a, b) => {
     const aUniqueLetters = new Set(a).size;
     const bUniqueLetters = new Set(b).size;
@@ -59,12 +47,6 @@ export function suggestWord(absent, correct, present, bannedWords) {
   return suggestions[0];
 }
 
-/**
- *
- * @param {string} word
- * @param {string} val
- * @returns
- */
 function getAllIndexes(word, val) {
   const indexes = [];
 

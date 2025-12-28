@@ -1,17 +1,10 @@
 import express from "express";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import words from "../src/words.json" with { type: "json" };
+import { join } from "path";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
 
 // Serve static files from the dist folder (local dev only; ignored by Vercel in prod)
 app.use(express.static(join(process.cwd(), "src", "web", "dist")));
-
-app.get("/api/words", (req, res) => {
-  res.json(words);
-});
 
 app.get("/api/:date", async (req, res) => {
   const { date } = req.params;
