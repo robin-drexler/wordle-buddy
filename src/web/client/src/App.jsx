@@ -88,6 +88,14 @@ export function App() {
   const runIdRef = useRef(0);
   const [startWord, setStartWord] = useState("trace");
 
+  // date selection state (native date input)
+  const [selectedDate, setSelectedDate] = useState(
+    formatLocalDateForApi(new Date())
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const today = formatLocalDateForApi(new Date());
+  const isTodaySelected = selectedDate === today;
+
   const normalizedStart = (startWord || "").toLowerCase();
   const isStartWordValid =
     normalizedStart.length === 5 && words.includes(normalizedStart);
@@ -99,6 +107,10 @@ export function App() {
     // invalidate any running solver
     runIdRef.current++;
     dispatch({ type: "RESET" });
+    // reset selected date and hide picker
+    setSelectedDate(today);
+    setShowDatePicker(false);
+    // intentionally do not set a message here; leave message cleared
   }
 
   function handleSubmit(e) {
@@ -115,9 +127,13 @@ export function App() {
     if (state.running) return;
     const myRunId = ++runIdRef.current;
     dispatch({ type: "RESET" });
-    dispatch({ type: "START", message: "Fetching today's solution..." });
+    const date = selectedDate || formatLocalDateForApi(new Date());
+    const startMsg =
+      date === formatLocalDateForApi(new Date())
+        ? "Fetching today's solution..."
+        : `Fetching solution for ${date}...`;
+    dispatch({ type: "START", message: startMsg });
 
-    const date = formatLocalDateForApi(new Date());
     let solution;
 
     try {
@@ -336,23 +352,25 @@ export function App() {
               </div>
 
               <div className="mt-4 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-center">
-                <button
-                  type="submit"
-                  className={`w-full sm:w-auto h-10 flex items-center justify-center px-4 rounded-md font-semibold bg-amber-300 text-gray-900 border border-black/10 focus:outline-none focus:ring-2 focus:ring-white/10 disabled:opacity-60 disabled:cursor-not-allowed ${
-                    state.running || startSubmitInvalid
-                      ? "opacity-60 cursor-not-allowed"
-                      : "hover:-translate-y-0.5 transform transition"
-                  }`}
-                  disabled={state.running || startSubmitInvalid}
-                  aria-disabled={
-                    state.running || startSubmitInvalid ? "true" : "false"
-                  }
-                  aria-describedby={
-                    startSubmitInvalid ? "start-error" : undefined
-                  }
-                >
-                  Solve Today's Wordle
-                </button>
+                <div className="w-full sm:w-auto flex flex-col items-center gap-2">
+                  <button
+                    type="submit"
+                    className={`w-full sm:w-auto h-10 flex items-center justify-center px-4 rounded-md font-semibold bg-amber-300 text-gray-900 border border-black/10 focus:outline-none focus:ring-2 focus:ring-white/10 disabled:opacity-60 disabled:cursor-not-allowed ${
+                      state.running || startSubmitInvalid
+                        ? "opacity-60 cursor-not-allowed"
+                        : "hover:-translate-y-0.5 transform transition"
+                    }`}
+                    disabled={state.running || startSubmitInvalid}
+                    aria-disabled={
+                      state.running || startSubmitInvalid ? "true" : "false"
+                    }
+                    aria-describedby={
+                      startSubmitInvalid ? "start-error" : undefined
+                    }
+                  >
+                    Solve Wordle
+                  </button>
+                </div>
 
                 <button
                   type="button"
@@ -437,6 +455,42 @@ export function App() {
                     })}
                   </div>
                 ))}
+              </div>
+
+              {/* Calendar control placed beneath the keyboard */}
+              <div className="mt-4 flex flex-col items-center">
+                <button
+                  type="button"
+                  className="text-sm text-gray-300 hover:text-amber-300 focus:outline-none focus:ring-2 focus:ring-white/10"
+                  onClick={() => setShowDatePicker((s) => !s)}
+                  aria-expanded={showDatePicker ? "true" : "false"}
+                  aria-controls="date-picker"
+                  title="Choose a different date"
+                >
+                  {isTodaySelected
+                    ? "Choose a different date"
+                    : `Selected: ${selectedDate} (change)`}
+                </button>
+
+                {showDatePicker && (
+                  <div
+                    className="flex justify-center mt-2 mb-2"
+                    id="date-picker"
+                  >
+                    <label htmlFor="date-picker-input" className="sr-only">
+                      Pick a date
+                    </label>
+                    <input
+                      id="date-picker-input"
+                      type="date"
+                      value={selectedDate}
+                      max={formatLocalDateForApi(new Date())}
+                      min="2021-06-19"
+                      onInput={(e) => setSelectedDate(e.target.value)}
+                      className="px-2 py-1 rounded-md bg-white/6 border border-white/12 text-gray-200 text-sm"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </div>
