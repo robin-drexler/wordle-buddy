@@ -3,17 +3,30 @@
   "version": "0.0.5",
   "description": "Bot that solves wordle puzzles",
   "main": "index.mjs",
-  "bin": "bin.mjs",
+  "type": "module",
+  "bin": "./src/playwright/bin.mjs",
   "scripts": {
-    "play": "./bin.mjs",
-    "record": "RECORD_VIDEO=1 ./bin.mjs"
+    "playwright:play": "./src/playwright/bin.mjs",
+    "playwright:record": "RECORD_VIDEO=1 ./src/playwright/bin.mjs",
+    "build:client": "cd src/web/client && vite build",
+    "build:client:watch": "cd src/web/client && vite build --watch --mode development",
+    "dev:client": "cd src/web/client && vite",
+    "build": "bun run build:client"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@preact/preset-vite": "^2.10.2",
+    "express": "^4.13.3",
     "find-up": "^6.2.0",
     "playwright": "^1.17.2",
-    "sinon": "^12.0.1"
+    "preact": "^10.28.1",
+    "sinon": "^12.0.1",
+    "vite": "^7.3.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.18",
+    "tailwindcss": "^4.1.18"
   }
 }

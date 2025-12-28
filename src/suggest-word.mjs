@@ -1,8 +1,4 @@
-import { createRequire } from "module";
-// @ts-ignore
-const require = createRequire(import.meta.url);
-
-const words = require("./words.json");
+import words from "./words.json" with { type: "json" };
 
 /**
  * @typedef {Map<string,number[]>} LetterPositions
