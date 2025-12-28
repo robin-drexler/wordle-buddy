@@ -459,7 +459,7 @@ export function App() {
           </p>
           <p className="mt-1">
             <a
-              href="https://github.com/robin-drexler/httsleep"
+              href="https://github.com/robin-drexler/wordle-buddy"
               className="text-[#e9d5ff] underline"
               target="_blank"
               rel="noopener noreferrer"
